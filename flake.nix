@@ -17,9 +17,13 @@
             version = "1.0.0";
             src = ./.;
             installPhase = ''
-              mkdir -p $out/share/plymouth/themes/nixy
-              cp nixy/* $out/share/plymouth/themes/nixy/
-              sed -i "s|/share|$out/share|g" $out/share/plymouth/themes/nixy/nixy.plymouth
+              INSTALL_PATH="$out/share/plymouth/themes/nixy"
+              mkdir -p $INSTALL_PATH        
+              cp -v nixy/nixy.plymouth $INSTALL_PATH/
+              cp -v nixy/nixy.script $INSTALL_PATH/
+              cp -v nixy/logo.png $INSTALL_PATH/
+              sed -i "s@/usr/share@$out/share@g" $INSTALL_PATH/nixy.plymouth
+              sed -i "s@/share@$out/share@g" $INSTALL_PATH/nixy.plymouth
             '';
           };
         });
