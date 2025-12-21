@@ -4,5 +4,5 @@ Description=Nix boot animation
 ModuleName=script
 
 [script]
-ImageDir=@ROOT@
-ScriptFile=@ROOT@nixy.script
+ImageDir=.
+ScriptFile=./nixy.script
