@@ -22,7 +22,7 @@
           mkdir -p $out/share/plymouth/themes/nixy
 
           # Copy the actual theme files from the nested directory
-          cp -r nixy/nixy/* $out/share/plymouth/themes/nixy/
+          cp -r plymouth-nixy/nixy/* $out/share/plymouth/themes/nixy
 
           # Patch any /usr/ paths in the .plymouth file to point to $out
           sed -i "s@/usr/@$out/@g" $out/share/plymouth/themes/nixy/nixy.plymouth
