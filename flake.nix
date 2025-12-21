@@ -1,30 +1,39 @@
 {
   description = "Nixy Plymouth Theme";
 
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-
-  outputs = { self, nixpkgs }: {
-    packages.x86_64-linux.default =
-      with import nixpkgs { system = "x86_64-linux"; };
-      stdenv.mkDerivation {
-        pname = "nixy-plymouth-theme";
-        version = "1.0";
-
-        src = ./nixy;
-
-        dontBuild = true;
-
-        installPhase = ''
-          # Create the standard Plymouth theme directory
-          mkdir -p $out/share/plymouth/themes/nixy
-
-          # Copy all files from src (the nixy/ folder) into the theme directory
-          cp -r * $out/share/plymouth/themes/nixy/
-
-          # Patch any /usr/ references in .plymouth files to point to the store path
-          find $out/share/plymouth/themes/ -name "*.plymouth" -exec \
-            sed -i "s|/usr/|$out/|g" {} \;
-        '';
-      };
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
+
+  outputs = { self, nixpkgs }:
+    let
+      systems = [ "x86_64-linux" "aarch64-linux" ];
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+    in
+    {
+      packages = forAllSystems (system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          default = pkgs.stdenv.mkDerivation {
+            pname = "plymouth-theme-nixy";
+            version = "1.0.0";
+
+            src = ./.;
+
+            dontBuild = true;
+
+            installPhase = ''
+              mkdir -p $out/share/plymouth/themes/nixy
+              cp -r nixy/* $out/share/plymouth/themes/nixy/
+            '';
+
+            meta = with pkgs.lib; {
+              description = "Nixy Plymouth Theme";
+              platforms = platforms.linux;
+            };
+          };
+        });
+    };
 }
