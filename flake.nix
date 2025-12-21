@@ -1,42 +1,30 @@
 {
   description = "Nixy Plymouth Theme";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  };
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-  outputs = { self, nixpkgs }: let
-    supportedSystems = [ "x86_64-linux" "aarch64-linux" ];
-    forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-  in {
-    packages = forAllSystems (system: let
-      pkgs = import nixpkgs { inherit system; };
-    in {
-      nixy-plymouth-theme = pkgs.stdenv.mkDerivation {
+  outputs = { self, nixpkgs }: {
+    packages.x86_64-linux.default =
+      with import nixpkgs { system = "x86_64-linux"; };
+      stdenv.mkDerivation {
         pname = "nixy-plymouth-theme";
         version = "1.0";
 
-        src = self;
+        src = ./nixy;
 
         dontBuild = true;
 
         installPhase = ''
+          # Create the standard Plymouth theme directory
           mkdir -p $out/share/plymouth/themes/nixy
 
-          # Copy the theme files from the 'nixy' folder at repo root
-          cp -r nixy/* $out/share/plymouth/themes/nixy/
+          # Copy all files from src (the nixy/ folder) into the theme directory
+          cp -r * $out/share/plymouth/themes/nixy/
 
-          # Make the .plymouth file writable and patch any /usr/ paths
-          chmod +w $out/share/plymouth/themes/nixy/nixy.plymouth
-          sed -i "s|/usr/|$out/|g" $out/share/plymouth/themes/nixy/nixy.plymouth
+          # Patch any /usr/ references in .plymouth files to point to the store path
+          find $out/share/plymouth/themes/ -name "*.plymouth" -exec \
+            sed -i "s|/usr/|$out/|g" {} \;
         '';
       };
-
-      default = self.packages.${system}.nixy-plymouth-theme;
-    });
-
-    overlays.default = final: prev: {
-      nixy-plymouth-theme = self.packages.${prev.system}.nixy-plymouth-theme;
-    };
   };
 }
