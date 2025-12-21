@@ -16,7 +16,7 @@
           pkgs = nixpkgs.legacyPackages.${system};
         in
         {
-          default = pkgs.stdenv.mkDerivation {
+          default = pkgs.stdenvNoCC.mkDerivation {
             pname = "plymouth-theme-nixy";
             version = "1.0.0";
 
@@ -25,13 +25,18 @@
             dontBuild = true;
 
             installPhase = ''
+              runHook preInstall
+              
               mkdir -p $out/share/plymouth/themes/nixy
-              cp -r nixy/* $out/share/plymouth/themes/nixy/
+              cp nixy/* $out/share/plymouth/themes/nixy/
+              
+              runHook postInstall
             '';
 
             meta = with pkgs.lib; {
               description = "Nixy Plymouth Theme";
               platforms = platforms.linux;
+              maintainers = [ ];
             };
           };
         });
