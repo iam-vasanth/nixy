@@ -25,12 +25,16 @@
             dontBuild = true;
 
             installPhase = ''
-              runHook preInstall
+              INSTALL_PATH="$out/share/plymouth/themes/nixy"
+              mkdir -p $INSTALL_PATH        
+              # Copy all theme files
+              cp -v nixy/nixy.plymouth $INSTALL_PATH/
+              cp -v nixy/nixy.script $INSTALL_PATH/
+              cp -v nixy/logo.png $INSTALL_PATH/
               
-              mkdir -p $out/share/plymouth/themes/nixy
-              cp nixy/* $out/share/plymouth/themes/nixy/
-              
-              runHook postInstall
+              # Fix any absolute paths in .plymouth file
+              sed -i "s@/usr/share@$out/share@g" $INSTALL_PATH/nixy.plymouth
+              sed -i "s@/share@$out/share@g" $INSTALL_PATH/nixy.plymouth
             '';
 
             meta = with pkgs.lib; {
